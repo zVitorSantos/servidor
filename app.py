@@ -1,45 +1,47 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
 
 app = Flask(__name__)
-app.secret_key = '1234'  # Para usar sessões, é preciso de uma chave secreta
+app.secret_key = '1234'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database/users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Banco de dados fictício
-users_db = []
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    username = db.Column(db.String(80), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(120), nullable=False)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 @app.route('/')
 def main():
     return render_template('main.html')
 
 def get_user_by_email_or_username(email_or_username):
-    conn = sqlite3.connect('database/users.db')
-    cursor = conn.cursor()
-    cursor.execute("""
-    SELECT * FROM users WHERE username=? OR email=?
-    """, (email_or_username, email_or_username))
-    user = cursor.fetchone()
-    conn.close()
+    user = User.query.filter((User.username == email_or_username) | (User.email == email_or_username)).first()
     return user
 
 def check_credentials(username_or_email, password):
     user = get_user_by_email_or_username(username_or_email)
-    if user and check_password_hash(user[4], password):  
+    if user and check_password_hash(user.password, password):
         return True
     return False
 
 def register_user(name, username, email, password):
     try:
         hashed_password = generate_password_hash(password)
-        conn = sqlite3.connect('database/users.db')
-        cursor = conn.cursor()
-        cursor.execute("""
-        INSERT INTO users (name, username, email, password) VALUES (?, ?, ?, ?)
-        """, (name, username, email, hashed_password))
-        conn.commit()
-        conn.close()
+        user = User(name=name, username=username, email=email, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
         return True
-    except sqlite3.IntegrityError:
+    except Exception as e:
+        db.session.rollback()
         return False
 
 @app.route('/login', methods=['POST'])
@@ -48,7 +50,7 @@ def login():
     password = request.form.get('loginPassword')
 
     if check_credentials(email_or_username, password):
-        session['user_id'] = email_or_username 
+        session['user_id'] = email_or_username
         return redirect(url_for('main'))
     else:
         flash('Credenciais inválidas. Por favor, tente novamente.')
@@ -71,8 +73,11 @@ def register():
         flash('Um usuário com esse email já está registrado.')
         return redirect(url_for('main'))
 
-    register_user(name, username, email, password)
-    flash('Registro bem-sucedido! Agora você pode fazer login.')
+    if register_user(name, username, email, password):
+        flash('Registro bem-sucedido! Agora você pode fazer login.')
+    else:
+        flash('Ocorreu um erro ao tentar registrar o usuário. Por favor, tente novamente.')
+
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
