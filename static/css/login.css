@@ -19,7 +19,7 @@ body {
 }
 
 .container { 
-    max-width: 340px; 
+    max-width: 270px; 
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -36,6 +36,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.form-outline {
+    margin-top: 0.5rem;
 }
 
 form.form-login {
@@ -58,17 +62,11 @@ form.form-login {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0 !important;
 }
 
 .btn-width {
     width: 50%; 
-}
-
-form.form-register {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .position-relative {
