@@ -10,3 +10,15 @@ function togglePasswordVisibility(inputId, icon) {
         icon.classList.add("fa-eye-slash");
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        var modal = document.getElementById('errorModal');
+        var errorMessage = modal.getAttribute('data-bs-error-message');
+        var errorType = modal.getAttribute('data-bs-error-type');
+        if (errorMessage && errorType === 'error') {
+            var errorModal = new bootstrap.Modal(modal);
+            errorModal.show();
+        }
+    }, 0);
+});

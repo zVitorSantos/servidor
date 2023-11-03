@@ -112,3 +112,8 @@ a#tab-login.nav-link {
 .nav-pills .nav-link:hover {
     background-color: #ced4da; 
 }
+
+/* Modal */
+.modal-edit .modal-content {
+    text-align: center;
+}
