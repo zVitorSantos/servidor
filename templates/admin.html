@@ -10,40 +10,40 @@
     <title>Painel de Admin</title>
 </head>
 <body>
-<div class="container-fluid">
-    <!-- Navegação no topo -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="container-fluid px-0"> <!-- Remova o padding para que a navbar ocupe toda a largura da tela -->
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100 mb-3"> <!-- A navbar ocupa toda a largura e tem margem embaixo -->
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <a class="navbar-brand" href="#">
+                <i class="fab fa-github fa-2x mx-3 ps-1"></i>
+            </a>
+            <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
+                data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-users"></i>
-                            Usuários
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-cogs"></i>
-                            Configurações
-                        </a>
-                    </li>
-                </ul>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- Itens da navbar -->
             </div>
+
+            <ul class="navbar-nav">
+                <li class="nav-item me-3 me-lg-0 dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        <img src="https://mdbootstrap.com/img/Photos/Avatars/img (31).jpg" class="rounded-circle" height="36" alt="" loading="lazy">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown1">
+                        <!-- Outras opções do menu -->
+                        <hr class="dropdown-divider">
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sair</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </nav>
-
-    <div class="row">
+    
+    <!-- Cards -->
+    <div class="row px-3"> 
         <div class="col-md-4 mb-4">
             <div class="card bg-primary text-white h-100">
                 <div class="card-body py-5">Estatísticas Principais</div>
@@ -81,23 +81,82 @@
     <!-- Fim dos cartões de estatísticas -->
 
     <!-- Tabela de usuários -->
-    <div class="row">
+    <div class="row px-3 mb-4">
         <div class="col">
             <h2>Usuários</h2>
+            <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#registerUserModal">
+                Adicionar Usuário
+            </button>
+            <button type="button" class="btn btn-secondary mb-3" id="updateUsersButton">
+                Atualizar Lista
+            </button>
             <div class="table-responsive">
                 <table class="table table-striped table-sm">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
+                            <th>Nome de Usuário</th>
                             <th>Email</th>
-                            <th>Ações</th>
+                            <th>Admin</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Conteúdo da tabela gerado dinamicamente -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="registerUserModal" tabindex="-1" aria-labelledby="registerUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerUserModalLabel">Registrar Novo Usuário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerUserForm">
+                        <div class="form-outline mb-4">
+                            <input type="text" id="userName" class="form-control form-control-lg" required />
+                            <label class="form-label" for="userName">Nome</label>
+                        </div>
+
+                        <div class="form-outline mb-4">
+                            <input type="text" id="userUsername" class="form-control form-control-lg" required />
+                            <label class="form-label" for="userUsername">Nome de Usuário</label>
+                        </div>
+
+                        <div class="form-outline mb-4">
+                            <input type="email" id="userEmail" class="form-control form-control-lg" required />
+                            <label class="form-label" for="userEmail">Email</label>
+                        </div>
+
+                        <div class="form-outline mb-4">
+                            <input type="new-password" id="password" class="form-control form-control-lg" required/>
+                            <label class="form-label" for="password">Senha</label>
+                        </div>
+
+                        <div class="form-outline mb-4">
+                            <input type="new-password" id="confirm_password" class="form-control form-control-lg" required/>
+                            <label class="form-label" for="confirm_password">Repita a senha</label>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="isAdmin" />
+                            <label class="form-check-label" for="isAdmin">Administrador</label>
+                        </div>
+
+                        <!-- Aqui você pode adicionar outros campos, se necessário -->
+                        <!-- Mensagem de erro -->
+                        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="register_button" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Registrar</button>
+                </div>
             </div>
         </div>
     </div>
