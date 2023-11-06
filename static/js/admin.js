@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    var tbodyEl = $('table tbody');
     function checkUserPermission(callback) {
         $.ajax({
             url: '/check-permission',
@@ -48,7 +49,11 @@ $(document).ready(function() {
                                 <td>${user.username}</td>
                                 <td>${user.email}</td>
                                 <td>${user.is_admin ? 'Sim' : 'Não'}</td>
-                                <td><button class="btn btn-sm btn-outline-secondary">Atualizar</button></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger delete-btn" data-user-id="${user.id}">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
                             </tr>
                         `);
                     });
@@ -136,6 +141,31 @@ $(document).ready(function() {
             }
         });
     });
+
+    tbodyEl.on('click', '.delete-btn', function() {
+        var userId = $(this).data('user-id');
+        if (confirm('Tem certeza que deseja apagar o usuário?')) {
+            deleteUser(userId);
+        }
+    });
+
+    function deleteUser(userId) {
+        $.ajax({
+            url: '/delete-user/' + userId,
+            type: 'POST',  // Embora o método correto seja DELETE, alguns servidores/browsers não suportam
+            success: function(response) {
+                if(response.success) {
+                    alert('Usuário apagado com sucesso!');
+                    updateUsersTable();
+                } else {
+                    showError(response.message || 'Erro ao apagar o usuário. Tente novamente.');
+                }
+            },
+            error: function(xhr) {
+                showError('Erro na comunicação com o servidor: ' + xhr.statusText);
+            }
+        });
+    }
 
     // Chama a função para atualizar a tabela se o usuário estiver autorizado
     checkUserPermission(function(isPermitted) {

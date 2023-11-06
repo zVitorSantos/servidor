@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify
-from flask_login import UserMixin, LoginManager, AnonymousUserMixin, login_required, current_user
+from flask_login import UserMixin, LoginManager, AnonymousUserMixin, login_required, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from datetime import timedelta
@@ -17,7 +17,9 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    user = db.session.query(User).get(int(user_id))
+    # app.logger.debug(f"User loaded: {user}")
+    return user
 
 db = SQLAlchemy(app)
 
@@ -82,17 +84,6 @@ def check_permission():
     else:
         return jsonify({'isAllowed': False}), 403
 
-def register_user(name, username, email, password, is_admin=False):
-    try:
-        hashed_password = generate_password_hash(password)
-        user = User(name=name, username=username, email=email, password=hashed_password, is_admin=is_admin)
-        db.session.add(user)
-        db.session.commit()
-        return user.id
-    except Exception as e:
-        db.session.rollback()
-        return None
-
 # Rota para listar usuários
 @app.route('/users')
 @login_required
@@ -113,6 +104,17 @@ def list_users_route():
     except Exception as e:
         logging.error(f'Erro ao buscar usuários: {e}')
         return jsonify({'error': 'Erro interno do servidor'}), 500
+
+def register_user(name, username, email, password, is_admin=False):
+    try:
+        hashed_password = generate_password_hash(password)
+        user = User(name=name, username=username, email=email, password=hashed_password, is_admin=is_admin)
+        db.session.add(user)
+        db.session.commit()
+        return user.id
+    except Exception as e:
+        db.session.rollback()
+        return None
 
 @app.route('/register', methods=['POST'])
 @login_required
@@ -139,6 +141,20 @@ def register_user_route():
         return jsonify({'success': True, 'user_id': user.id})
     except Exception as e:
         db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+@app.route('/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_user_route(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao apagar usuário: {e}')
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/')
@@ -182,6 +198,7 @@ def login():
             return render_template('login.html')
 
         if check_credentials(email_or_username, password):
+            login_user(user, remember=remember, fresh=True)
             # Armazena o ID do usuário na sessão
             session['user_id'] = user.id
             logging.debug(f"Usuário {user.username} logado com sucesso. Sessão: {session}")
@@ -205,6 +222,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    logout_user() 
     # Remove o ID do usuário da sessão
     session.pop('user_id', None)
     # Mostra uma mensagem ao usuário
