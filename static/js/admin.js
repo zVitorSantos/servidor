@@ -44,17 +44,17 @@ $(document).ready(function() {
                     response.forEach(function(user) {
                         tbodyEl.append(`
                             <tr>
-                                <td>${user.id}</td>
-                                <td>${user.name}</td>
-                                <td>${user.username}</td>
-                                <td>${user.email}</td>
-                                <td>${user.is_admin ? 'Sim' : 'Não'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger delete-btn" data-user-id="${user.id}">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.is_admin ? 'Sim' : 'Não'}</td>
+                            <td class="p-0" style="vertical-align: middle; text-align: right; width: 44px;">
+                                <button class="btn btn-sm btn-outline-danger delete-btn d-block w-100" data-user-id="${user.id}" style="padding-top: 9px; padding-bottom: 9px; margin: 0; height: 100%; padding">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
                         `);
                     });
                 } else {
